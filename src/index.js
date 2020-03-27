@@ -85,7 +85,7 @@ page('/import', () => {
         <!-- <mwc-button raised  label="Upload"></mwc-button> -->
       </div>
       <div class="selection">
-        <h4>Upload Image from Camera (Environment)</h4>
+        <h4>Upload Image from Camera</h4>
         <!-- Reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture -->
         <input type="file" accept="image/*" capture="environment">
         <!-- <mwc-button raised  label="Upload"></mwc-button> -->
