@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run config; npm run copy; ",
+    "build": "npm run config; npm run copy; rollup -c -m",
     "config": "rm -rf dist/; mkdir dist",
     "copy": "cp -u src/*.html dist/; cp -u src/*.css dist/",
     "update:ui": "rm -rf dist/*.html",
-    "start:dev": "http-server -a 0.0.0.0 dist/index.html",
+    "start:dev": "http-server -c-1 dist/",
     "watch": "rollup -w -c -m"
   },
   "author": "",
