@@ -1,0 +1,30 @@
+{
+  "name": "mobile-video",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run config; npm run copy; ",
+    "config": "rm -rf dist/; mkdir dist",
+    "copy": "cp -u src/*.html dist/; cp -u src/*.css dist/",
+    "update:ui": "rm -rf dist/*.html",
+    "start:dev": "http-server -a 0.0.0.0 dist/index.html",
+    "watch": "rollup -w -c -m"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@material/mwc-button": "^0.14.1",
+    "@material/mwc-tab": "^0.14.1",
+    "@material/mwc-tab-bar": "^0.14.1",
+    "lit-html": "^1.2.1",
+    "page": "^1.11.5",
+    "page.js": "^4.13.3"
+  },
+  "devDependencies": {
+    "http-server": "^0.12.1",
+    "rollup": "^2.2.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-server": "^0.7.0"
+  }
+}
