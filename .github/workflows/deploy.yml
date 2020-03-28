@@ -1,0 +1,30 @@
+name: Deploy to Github Pages
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persists-credentials: false
+
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+      
+      # - name: Deploy
+      #   run: |
+      #     git subtree push --prefix dist origin gh-pages
+
+      # - name: Deploy
+      #   uses: JameIves/github-pages-deploy-action@release/v3
+      #   with:
+      #     ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      #     BRANCH: gh-pages
+      #     folder: .
