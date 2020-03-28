@@ -17,10 +17,11 @@ jobs:
         run: |
           npm install
           npm run build
+          git add dist
+          git commit -m 'deploy'
       
       - name: Deploy
         run: |
-          git fetch
           git subtree push --prefix dist origin gh-pages
 
       # - name: Deploy
