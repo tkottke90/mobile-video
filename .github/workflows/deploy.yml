@@ -18,9 +18,9 @@ jobs:
           npm install
           npm run build
       
-      # - name: Deploy
-      #   run: |
-      #     git subtree push --prefix dist origin gh-pages
+      - name: Deploy
+        run: |
+          git subtree push --prefix dist origin gh-pages
 
       # - name: Deploy
       #   uses: JameIves/github-pages-deploy-action@release/v3
