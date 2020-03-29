@@ -5852,9 +5852,13 @@ TabBar = __decorate([
     customElement('mwc-tab-bar')
 ], TabBar);
 
-const hasVideo = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+const hasVideo = !!(
+  navigator.mediaDevices && 
+  navigator.mediaDevices.getUserMedia
+);
 
-let video;
+let videoStream;
+
 const videoConstraints = window.constraints = {
   video: true,
   audio: false
@@ -5884,10 +5888,12 @@ const template = (content) => {
 
     overflow: auto;
 
-    padding: 1rem;
+    background-color: #efefef;
   }
 
   .card {
+    margin: 1rem;
+    background-color: #fff;
     padding: 0.5rem;
     box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12);
   }
@@ -5952,25 +5958,81 @@ page('/import', () => {
   render(template(content), document.body);
 });
 
-page('/', () => {
+page('/', async () => {
   let content;
 
   if (hasVideo) {
 
-    video = document.createElement('video');
+    videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.createElement('video');
+    video.srcObject = videoStream;
+    video.setAttribute('autoplay', '');
+    
+    console.dir(video);
+
+    const pauseVideo = () => {
+      video.pause();
+    };
+
+    const startVideo = () => {
+      video.play();
+    };
+
+    const createSnap = async ($event) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      var ctx = canvas.getContext('2d');
+
+      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      var dataURI = canvas.toDataURL('image/png');
+
+      const image = document.createElement('img');
+      const imageList = document.querySelector('.snapshots');
+
+      image.src = dataURI;
+
+      imageList.appendChild(image);
+      return dataURI;
+    };
 
     content = html`
     <style>
+      video {
+        width: 100%;
+      }
+
+      .live .actions {
+
+        margin-top: 1rem;
+
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .actions mwc-button {
+        margin: 0 0.5rem;
+      }
+
+      .snapshots img {
+        width: 100%;
+        padding: 0.5rem;
+      }
     </style>
     <div class="card live">
-      <video autoplay></video>
-      <canvas style="display:none;"></canvas>
+      ${video}
+      <div class="actions">
+        <mwc-button label="Snap" outlined @click=${createSnap}></mwc-button>
+        <mwc-button label="Pause" outlined @click=${pauseVideo}></mwc-button>
+        <mwc-button label="Play" raised @click=${startVideo}></mwc-button>
+      </div>
+    </div>
+    <div class="card snapshots">
+      <h3>Snapshots</h3>
+
     </div>
     `;
-
-    navigator.mediaDevices.getUserMedia(constraints).then( stream => {
-      video.srcObject = stream;
-    });
   } else {
     content = html`
     <style>
