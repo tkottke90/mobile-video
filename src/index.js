@@ -123,7 +123,7 @@ page('/', async () => {
     
     console.dir(video);
 
-    const stopVideo = () => {
+    const pauseVideo = () => {
       video.pause();
     };
 
@@ -147,6 +147,7 @@ page('/', async () => {
       image.src = dataURI;
 
       imageList.appendChild(image);
+      return dataURI;
     }
 
     content = html`
@@ -174,10 +175,9 @@ page('/', async () => {
     </style>
     <div class="card live">
       ${video}
-      <canvas style="display:none;"></canvas>
       <div class="actions">
         <mwc-button label="Snap" outlined @click=${createSnap}></mwc-button>
-        <mwc-button label="Stop" outlined @click=${stopVideo}></mwc-button>
+        <mwc-button label="Pause" outlined @click=${pauseVideo}></mwc-button>
         <mwc-button label="Play" raised @click=${startVideo}></mwc-button>
       </div>
     </div>
