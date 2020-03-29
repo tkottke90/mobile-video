@@ -10,6 +10,8 @@ const hasVideo = !!(
 );
 
 let videoStream;
+let videoMeta;
+
 const videoConstraints = window.constraints = {
   video: true,
   audio: false
@@ -118,6 +120,8 @@ page('/', async () => {
     const video = document.createElement('video');
     video.srcObject = videoStream;
     video.setAttribute('autoplay', '');
+    
+    console.dir(video);
 
     const stopVideo = () => {
       video.pause();
@@ -126,6 +130,24 @@ page('/', async () => {
     const startVideo = () => {
       video.play();
     };
+
+    const createSnap = async ($event) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      var ctx = canvas.getContext('2d');
+
+      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
+      var dataURI = canvas.toDataURL('image/png');
+
+      const image = document.createElement('img');
+      const imageList = document.querySelector('.snapshots');
+
+      image.src = dataURI;
+
+      imageList.appendChild(image);
+    }
 
     content = html`
     <style>
@@ -144,14 +166,24 @@ page('/', async () => {
       .actions mwc-button {
         margin: 0 0.5rem;
       }
+
+      .snapshots img {
+        width: 100%;
+        padding: 0.5rem;
+      }
     </style>
     <div class="card live">
       ${video}
       <canvas style="display:none;"></canvas>
       <div class="actions">
+        <mwc-button label="Snap" outlined @click=${createSnap}></mwc-button>
         <mwc-button label="Stop" outlined @click=${stopVideo}></mwc-button>
         <mwc-button label="Play" raised @click=${startVideo}></mwc-button>
       </div>
+    </div>
+    <div class="card snapshots">
+      <h3>Snapshots</h3>
+
     </div>
     `;
   } else {
