@@ -17,23 +17,9 @@ jobs:
         run: |
           npm install
           npm run build
-          git add dist
-          git config --local user.email "action@github.com"
-          git config --local user.name "Github Action"
-          git commit -m 'deploy'
 
-      - name: Git Info
-        run: |
-          ls -halt
-          git status
-
-      - name: Deploy
-        run: |
-          git subtree push --prefix dist origin gh-pages
-
-      # - name: Deploy
-      #   uses: JameIves/github-pages-deploy-action@release/v3
-      #   with:
-      #     ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      #     BRANCH: gh-pages
-      #     folder: .
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: . # The folder the action should deploy.
