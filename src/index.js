@@ -4,9 +4,12 @@ import { html, render } from 'lit-html';
 import '@material/mwc-button';
 import '@material/mwc-tab-bar';
 
-const hasVideo = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+const hasVideo = !!(
+  navigator.mediaDevices && 
+  navigator.mediaDevices.getUserMedia
+);
 
-let video;
+let videoStream;
 const videoConstraints = window.constraints = {
   video: true,
   audio: false
@@ -36,10 +39,12 @@ const template = (content) => {
 
     overflow: auto;
 
-    padding: 1rem;
+    background-color: #efefef;
   }
 
   .card {
+    margin: 1rem;
+    background-color: #fff;
     padding: 0.5rem;
     box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12);
   }
@@ -104,25 +109,51 @@ page('/import', () => {
   render(template(content), document.body);
 });
 
-page('/', () => {
+page('/', async () => {
   let content;
 
   if (hasVideo) {
 
-    video = document.createElement('video');
+    videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.createElement('video');
+    video.srcObject = videoStream;
+    video.setAttribute('autoplay', '');
+
+    const stopVideo = () => {
+      video.pause();
+    };
+
+    const startVideo = () => {
+      video.play();
+    };
 
     content = html`
     <style>
+      video {
+        width: 100%;
+      }
+
+      .live .actions {
+
+        margin-top: 1rem;
+
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .actions mwc-button {
+        margin: 0 0.5rem;
+      }
     </style>
     <div class="card live">
-      <video autoplay></video>
+      ${video}
       <canvas style="display:none;"></canvas>
+      <div class="actions">
+        <mwc-button label="Stop" outlined @click=${stopVideo}></mwc-button>
+        <mwc-button label="Play" raised @click=${startVideo}></mwc-button>
+      </div>
     </div>
     `;
-
-    navigator.mediaDevices.getUserMedia(constraints).then( stream => {
-      video.srcObject = stream;
-    });
   } else {
     content = html`
     <style>
