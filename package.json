@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "setup-env": "echo \"dist/\" >> .git/info/exclude ",
     "build": "npm run config; npm run copy; rollup -c -m",
     "config": "rm -rf dist/; mkdir dist",
     "copy": "cp -u src/*.html dist/; cp -u src/*.css dist/",
