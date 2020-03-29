@@ -18,12 +18,13 @@ jobs:
           npm install
           npm run build
           git add dist
-          git config --global user.email "t.kottke90@gmail.com"
-          git config --global user.name "Thomas Kottke"
+          git config --local user.email "action@github.com"
+          git config --local user.name "Github Action"
           git commit -m 'deploy'
       
       - name: Deploy
         run: |
+          ls -halt
           git subtree push --prefix dist origin gh-pages
 
       # - name: Deploy
