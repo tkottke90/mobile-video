@@ -23,9 +23,9 @@ jobs:
           git commit -m 'deploy'
 
       - name: Git Info
-          run: |
-            ls -halt
-            git status
+        run: |
+          ls -halt
+          git status
 
       - name: Deploy
         run: |
