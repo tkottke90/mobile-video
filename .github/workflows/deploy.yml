@@ -25,6 +25,8 @@ jobs:
       - name: Deploy
         run: |
           ls -halt
+          git status
+          git fetch
           git subtree push --prefix dist origin gh-pages
 
       # - name: Deploy
