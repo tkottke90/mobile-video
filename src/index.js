@@ -114,14 +114,89 @@ page('/import', () => {
 page('/', async () => {
   let content;
 
+  const renderWithErrors = (errorTemplates) => html`
+  <style>
+    .live {
+      max-width: 30rem;
+      margin: 1rem auto;
+      display: flex;
+      flex-direction: column;
+
+      padding: 1rem;
+    }
+
+    .live h3 {
+      margin: auto auto 2rem auto;
+    }
+
+    .live h4 {
+      margin-bottom: 0.5rem;
+    }
+
+    .requirement {
+      display: flex;
+    }
+
+    .requirement p {
+      margin-left: 1rem;
+      line-height: 1.5rem;
+    }
+
+
+    .code {
+      background: lightgray;
+      color: #b57500;
+    }
+  </style>
+  <div class="card live">
+    <h3>Cannot Access Media Devices!</h3>
+
+    <h4>Requirements</h4>
+    <ul>
+      <li class="requirement">
+        ${renderBooleanIcon( window.location.protocol === 'https' || window.location.hostname === 'localhost' )}
+        <p>Using HTTPS (or running on Localhost)</p>
+      </li>
+      <li class="requirement">
+        ${renderBooleanIcon( !!navigator.mediaDevices )}
+        <p>Browser access to <span class="code">navigator.mediaDevices</span></p>
+      </li>
+      ${errorTemplates}
+    </ul>
+  </div>`
+
   if (hasVideo) {
 
-    videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-    const video = document.createElement('video');
-    video.srcObject = videoStream;
-    video.setAttribute('autoplay', '');
-    
+    let video;
+    try {
+      videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+      video = document.createElement('video');
+      video.srcObject = videoStream;
+      video.setAttribute('autoplay', '');
+    } catch (err) {
+      console.error(err);
+      const errorTemplate = html`
+        <li class="requirement">
+          <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="red" d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" /></svg>
+          <p> Error: ${err.message}</p>
+        </li>
+      `;
+      render(template(renderWithErrors(errorTemplate)), document.body);
+      return;
+    }
+
     console.dir(video);
+
+    const setupVideo = async () => {
+      videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+      video = document.createElement('video');
+      video.srcObject = videoStream;
+      video.setAttribute('autoplay', '');
+
+      return html`${video}`
+    }
+
+    const stopVideo = async () => {};
 
     const pauseVideo = () => {
       video.pause();
@@ -187,60 +262,7 @@ page('/', async () => {
     </div>
     `;
   } else {
-    content = html`
-    <style>
-      .live {
-        max-width: 30rem;
-        margin: 1rem auto;
-        display: flex;
-        flex-direction: column;
-
-        padding: 1rem;
-      }
-
-      .live h3 {
-        margin: auto auto 2rem auto;
-      }
-
-      .live h4 {
-        margin-bottom: 0.5rem;
-      }
-
-      .requirement {
-        display: flex;
-      }
-
-      .requirement p {
-        margin-left: 1rem;
-        line-height: 1.5rem;
-      }
-
-
-      .code {
-        background: lightgray;
-        color: #b57500;
-      }
-    </style>
-    <div class="card live">
-      <h3>Cannot Access Media Devices!</h3>
-
-      <h4>Requirements</h4>
-      <ul>
-        <li class="requirement">
-          ${renderBooleanIcon( window.location.protocol === 'https' )}
-          <p>Using HTTPS</p>
-        </li>
-        <li class="requirement">
-          ${renderBooleanIcon( !!navigator.mediaDevices )}
-          <p>Browser access to <span class="code">navigator.mediaDevices</span></p>
-        </li>
-        <!-- <li class="requirement">
-          
-          <p>Browser access to <span class="code">navigator.mediaDevices.getUserMedia</span></p>
-        </li> -->
-      </ul>
-    </div>
-    `;
+   content = renderWithErrors();
   }
 
   render(template(content), document.body);
