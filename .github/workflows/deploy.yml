@@ -21,12 +21,14 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "Github Action"
           git commit -m 'deploy'
-      
+
+      - name: Git Info
+          run: |
+            ls -halt
+            git status
+
       - name: Deploy
         run: |
-          ls -halt
-          git status
-          git fetch
           git subtree push --prefix dist origin gh-pages
 
       # - name: Deploy
