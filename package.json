@@ -17,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@material/mwc-button": "^0.14.1",
+    "@material/mwc-icon-button": "^0.14.1",
     "@material/mwc-tab": "^0.14.1",
     "@material/mwc-tab-bar": "^0.14.1",
     "lit-html": "^1.2.1",
