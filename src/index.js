@@ -14,7 +14,8 @@ let videoMeta;
 
 const videoConstraints = window.constraints = {
   video: true,
-  audio: false
+  audio: false,
+  facingMode: 'environment'
 }
 
 const routes = [
@@ -61,6 +62,21 @@ const template = (content) => {
 </div>
 
 `};
+
+const videoTick = (canvas, video) => async () => {
+  if (!video) {
+    return;
+  }
+  
+  const canvasContext = canvas.getContext('2d');
+
+  canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth;
+
+  canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  requestAnimationFrame(videoTick(canvas, video));
+}
 
 page('/import', () => {
   const content = html`
@@ -167,12 +183,17 @@ page('/', async () => {
 
   if (hasVideo) {
 
-    let video;
+    let video, canvas;
     try {
       videoStream = await navigator.mediaDevices.getUserMedia(constraints);
       video = document.createElement('video');
       video.srcObject = videoStream;
       video.setAttribute('autoplay', '');
+      video.setAttribute('hidden', '');
+
+      canvas = document.createElement('canvas');
+
+      requestAnimationFrame(videoTick(canvas, video));
     } catch (err) {
       console.error(err);
       const errorTemplate = html`
@@ -184,8 +205,6 @@ page('/', async () => {
       render(template(renderWithErrors(errorTemplate)), document.body);
       return;
     }
-
-    console.dir(video);
 
     const setupVideo = async () => {
       videoStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -227,7 +246,16 @@ page('/', async () => {
 
     content = html`
     <style>
+      .live {
+        max-width: 40rem;
+        margin: 1rem auto;
+      }
+
       video {
+        width: 100%;
+      }
+
+      canvas {
         width: 100%;
       }
 
@@ -250,6 +278,7 @@ page('/', async () => {
     </style>
     <div class="card live">
       ${video}
+      ${canvas}
       <div class="actions">
         <mwc-button label="Snap" outlined @click=${createSnap}></mwc-button>
         <mwc-button label="Pause" outlined @click=${pauseVideo}></mwc-button>
