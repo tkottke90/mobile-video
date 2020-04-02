@@ -10,8 +10,9 @@ const hasVideo = !!(
   navigator.mediaDevices.getUserMedia
 );
 
-let videoStream;
-let videoMeta;
+// let videoStream;
+let videoElement;
+let animationFrame;
 
 const videoConstraints = window.constraints = {
   video: true,
@@ -123,8 +124,6 @@ page('/import', () => {
   </div>
   `;
 
-
-
   render(template(content), document.body);
 });
 
@@ -134,7 +133,6 @@ page('/', async () => {
   const renderWithErrors = (errorTemplates) => html`
   <style>
     .live {
-      max-width: 30rem;
       margin: 1rem auto;
       display: flex;
       flex-direction: column;
@@ -180,21 +178,36 @@ page('/', async () => {
       </li>
       ${errorTemplates}
     </ul>
-  </div>`
+  </div>`;
+
+  const stopRecording = () => {
+    cancelAnimationFrame(animationFrame);
+
+    if (videoElement && videoElement.srcObject) {
+      for (const i of videoElement.srcObject.getTracks()) {
+        i.stop();
+      }
+    }
+
+    console.log('video active', videoElement.srcObject.active);
+
+    videoElement.srcObject = null;
+    // videoElement = null;
+  }
 
   if (hasVideo) {
 
-    let video, canvas;
+    let canvas;
     try {
-      videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-      video = document.createElement('video');
-      video.srcObject = videoStream;
-      video.setAttribute('autoplay', '');
-      video.setAttribute('hidden', '');
+      const videoStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+      videoElement = document.createElement('video');
+      videoElement.srcObject = videoStream;
+      videoElement.setAttribute('autoplay', '');
+      videoElement.setAttribute('hidden', '');
 
       canvas = document.createElement('canvas');
 
-      requestAnimationFrame(videoTick(canvas, video));
+      animationFrame = requestAnimationFrame(videoTick(canvas, videoElement));
     } catch (err) {
       console.error(err);
       const errorTemplate = html`
@@ -207,33 +220,42 @@ page('/', async () => {
       return;
     }
 
-    const setupVideo = async () => {
-      videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-      video = document.createElement('video');
-      video.srcObject = videoStream;
-      video.setAttribute('autoplay', '');
-
-      return html`${video}`
-    }
-
-    const stopVideo = async () => {};
-
     const pauseVideo = () => {
-      video.pause();
+      videoElement.pause();
     };
 
-    const startVideo = () => {
-      video.play();
+    const startVideo = async () => {
+      console.dir(videoElement);
+
+      if (videoElement.srcObject) {
+        videoElement.play();
+        return;
+      }
+
+      const videoStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+      videoElement = document.querySelector('video');
+
+      if (!videoElement) {
+        videoElement = document.createElement('video');
+      }
+
+      videoElement.srcObject = videoStream;
+      videoElement.setAttribute('autoplay', '');
+      videoElement.setAttribute('hidden', '');
+
+      canvas = document.createElement('canvas');
+
+      animationFrame = requestAnimationFrame(videoTick(canvas, videoElement));
     };
 
     const createSnap = async ($event) => {
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
 
       var ctx = canvas.getContext('2d');
 
-      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
+      ctx.drawImage(videoElement, 0, 0, videoElement.videoWidth, videoElement.videoHeight)
       var dataURI = canvas.toDataURL('image/png');
 
       const image = document.createElement('img');
@@ -249,10 +271,11 @@ page('/', async () => {
     <style>
       .live, .snapshots {
         max-width: 40rem;
+        min-width: 200px;
         margin: 1rem auto;
       }
 
-      @media only screen and (max-width: 480px) {
+      @media only screen and (max-width: 40rem) {
         .live, .snapshots {
           margin: 1rem 0.5rem;
         }
@@ -284,13 +307,13 @@ page('/', async () => {
       }
     </style>
     <div class="card live">
-      ${video}
+      ${videoElement}
       ${canvas}
       <div class="actions">
-        <mwc-icon-button icon="add_a_photo" outlined @click=${createSnap}></mwc-icon-button>
-        <mwc-icon-button icon="stop" outlined></mwc-icon-button>
-        <mwc-icon-button icon="pause" outlined @click=${pauseVideo}></mwc-icon-button>
-        <mwc-icon-button icon="play_arrow" raised @click=${startVideo}></mwc-icon-button>
+        <mwc-icon-button icon="add_a_photo"  @click=${createSnap}></mwc-icon-button>
+        <mwc-icon-button icon="stop"  @click=${stopRecording}></mwc-icon-button>
+        <mwc-icon-button icon="pause"  @click=${pauseVideo}></mwc-icon-button>
+        <mwc-icon-button icon="play_arrow"  @click=${startVideo}></mwc-icon-button>
       </div>
     </div>
     <div class="card snapshots">
