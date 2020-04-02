@@ -3,6 +3,7 @@ import { html, render } from 'lit-html';
 
 import '@material/mwc-button';
 import '@material/mwc-tab-bar';
+import '@material/mwc-icon-button';
 
 const hasVideo = !!(
   navigator.mediaDevices && 
@@ -246,9 +247,15 @@ page('/', async () => {
 
     content = html`
     <style>
-      .live {
+      .live, .snapshots {
         max-width: 40rem;
         margin: 1rem auto;
+      }
+
+      @media only screen and (max-width: 480px) {
+        .live, .snapshots {
+          margin: 1rem 0.5rem;
+        }
       }
 
       video {
@@ -267,8 +274,8 @@ page('/', async () => {
         justify-content: flex-end;
       }
 
-      .actions mwc-button {
-        margin: 0 0.5rem;
+      .actions mwc-icon-button {
+        color: var(--mdc-theme-primary);
       }
 
       .snapshots img {
@@ -280,9 +287,10 @@ page('/', async () => {
       ${video}
       ${canvas}
       <div class="actions">
-        <mwc-button label="Snap" outlined @click=${createSnap}></mwc-button>
-        <mwc-button label="Pause" outlined @click=${pauseVideo}></mwc-button>
-        <mwc-button label="Play" raised @click=${startVideo}></mwc-button>
+        <mwc-icon-button icon="add_a_photo" outlined @click=${createSnap}></mwc-icon-button>
+        <mwc-icon-button icon="stop" outlined></mwc-icon-button>
+        <mwc-icon-button icon="pause" outlined @click=${pauseVideo}></mwc-icon-button>
+        <mwc-icon-button icon="play_arrow" raised @click=${startVideo}></mwc-icon-button>
       </div>
     </div>
     <div class="card snapshots">
