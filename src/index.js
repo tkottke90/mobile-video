@@ -137,6 +137,15 @@ page('/import', () => {
       margin: auto 0;
     }
 
+    #collection {
+      opacity: 0;
+      transition: opacity 1s ease-out;
+    }
+
+    #collection:not(:empty) {
+      opacity: 1;
+    }
+
     #collection img {
       width: 100%;
     }
