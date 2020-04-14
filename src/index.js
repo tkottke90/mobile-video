@@ -80,6 +80,42 @@ const videoTick = (canvas, video) => async () => {
   requestAnimationFrame(videoTick(canvas, video));
 }
 
+ const files = [];
+
+const updateFile = ($event) => {
+  // console.dir($event.target.files);
+  const filesArray = Array.from($event.target.files);
+  files.push(...filesArray);
+
+  console.dir(files);
+
+  const collection = document.querySelector('#collection');
+
+  for (let file of filesArray) {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const type = file.type;
+      switch(type) {
+        case 'image/jpeg':
+          const imageElement = document.createElement('img');
+          imageElement.src = e.target.result;
+          collection.appendChild(imageElement);
+          break;
+        case 'video/mp4':
+          const videoElement = document.createElement('video');
+          videoElement.src = e.target.result;
+          videoElement.controls = true;
+          collection.appendChild(videoElement);
+          break;
+      }
+    }
+    
+
+    reader.readAsDataURL(file);
+  }
+}
+
 page('/import', () => {
   const content = html`
   <style>
@@ -100,27 +136,39 @@ page('/import', () => {
       line-height: 2rem;
       margin: auto 0;
     }
+
+    #collection img {
+      width: 100%;
+    }
+
+    #collection video {
+      width: 100%;
+    }
   </style>
   <div class="card import">
     <h3 class="import-header">Import</h3>
     <section class="import-buttons">
       <div class="selection">
         <h4>Upload Image from Phone</h4>
-        <input type="file" accept="image/*" >
+        <input type="file" accept="image/*" @change=${updateFile}>
         <!-- <mwc-button raised  label="Upload"></mwc-button> -->
       </div>
       <div class="selection">
         <h4>Upload Image from Camera</h4>
         <!-- Reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture -->
-        <input type="file" accept="image/*" capture="environment">
+        <input type="file" accept="image/*" capture="environment" @change=${updateFile}>
         <!-- <mwc-button raised  label="Upload"></mwc-button> -->
       </div>
       <div class="selection">
         <h4>Upload Video</h4>
-        <input type="file" accept="video/*" capture="camcorder">
+        <input type="file" accept="video/mp4" capture="camcorder" @change=${updateFile}>
         <!-- <mwc-button raised  label="Upload"></mwc-button> -->
       </div>
     </section>
+  </div>
+
+  <div class="card" id="collection">
+
   </div>
   `;
 
@@ -234,6 +282,7 @@ page('/', async () => {
 
       const videoStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
       videoElement = document.querySelector('video');
+    
 
       if (!videoElement) {
         videoElement = document.createElement('video');
