@@ -22,7 +22,7 @@ const videoConstraints = window.constraints = {
 
 const routes = [
   () => page('/'),
-  () => page('/import')
+  () => page('/live')
 ];
 
 const setTab = ($event) => {
@@ -55,8 +55,8 @@ const template = (content) => {
   }
 </style>
 <mwc-tab-bar @MDCTabBar:activated=${setTab}>
+  <mwc-tab label="Import"></mwc-tab>
   <mwc-tab label="Live Camera"></mwc-tab>
-  <mwc-tab label="Import From"></mwc-tab>
 </mwc-tab-bar>
 
 <div class="content">
@@ -83,7 +83,7 @@ const videoTick = (canvas, video) => async () => {
  const files = [];
 
 const updateFile = ($event) => {
-  // console.dir($event.target.files);
+  console.dir($event.target.files);
   const filesArray = Array.from($event.target.files);
   files.push(...filesArray);
 
@@ -116,7 +116,7 @@ const updateFile = ($event) => {
   }
 }
 
-page('/import', () => {
+page('/', () => {
   const content = html`
   <style>
     .import-buttons {
@@ -139,7 +139,7 @@ page('/import', () => {
 
     #collection {
       opacity: 0;
-      transition: opacity 1s ease-out;
+      transition: opacity 500ms ease-out;
     }
 
     #collection:not(:empty) {
@@ -176,15 +176,13 @@ page('/import', () => {
     </section>
   </div>
 
-  <div class="card" id="collection">
-
-  </div>
+  <div class="card" id="collection"></div>
   `;
 
   render(template(content), document.body);
 });
 
-page('/', async () => {
+page('/live', async () => {
   let content;
 
   const renderWithErrors = (errorTemplates) => html`
@@ -391,7 +389,8 @@ page('*', () => {
     <h4>Oops!  This page doesn't exist</h4>
   `;
 
-  render(template('404', content), document.body);
+  // render(template('404', content), document.body);
+  routes[0]();
 });
 
 page();
