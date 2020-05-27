@@ -15,14 +15,16 @@ let videoElement;
 let animationFrame;
 
 const videoConstraints = window.constraints = {
-  video: true,
-  audio: false,
-  facingMode: 'environment'
+  video: {
+    facingMode: { exact: 'environment' }
+  },
+  audio: false
 }
 
 const routes = [
   () => page('/'),
-  () => page('/live')
+  () => page('/live'),
+  () => page('/ocr')
 ];
 
 const setTab = ($event) => {
@@ -115,6 +117,78 @@ const updateFile = ($event) => {
     reader.readAsDataURL(file);
   }
 }
+
+const scanImage = async ($event) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = videoElement.videoWidth;
+  canvas.height = videoElement.videoHeight;
+
+  var ctx = canvas.getContext('2d');
+
+  ctx.drawImage(videoElement, 0, 0, videoElement.videoWidth, videoElement.videoHeight)
+  var dataURI = canvas.toDataURL('image/png');
+
+  const image = document.createElement('img');
+  const imageList = document.querySelector('.snapshots');
+
+  image.src = dataURI;
+
+  await worker.load();
+  await worker.loadLanguage('eng');
+  await worker.initialize('eng');
+  processTimer = Date.now();
+  const { data: { text } } = await worker.recognize(dataURI);
+  
+  const endTime = Date.now();
+  const timeDiff = endTime - processTimer;
+  processTimer = 0;
+  
+
+  const info = document.createElement('pre');
+  info.style.padding = '0.5rem';
+  info.style.margin = '0.5rem';
+  info.style.background = 'var(--mdc-theme-background)';
+  info.style.color = '#fff';
+
+  info.textContent = `
+  OCR Text Context:
+    Processing Time: ${(timeDiff / 1000)} sec
+
+  ${text}
+  `;
+
+  console.log('=== OCR DONE ===')
+  console.dir(text);
+  console.log('================')
+
+  imageList.appendChild(image);
+  imageList.appendChild(info);
+  return dataURI;
+}
+
+let processTimer = 0;
+const worker = Tesseract.createWorker({
+  workerPath: 'https://unpkg.com/tesseract.js@v2.0.0/dist/worker.min.js',
+  langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+  corePath: 'https://unpkg.com/tesseract.js-core@v2.0.0/tesseract-core.wasm.js',
+  logger: m => {
+    console.clear();
+    // console.table(m);
+    if (m.status !== 'recognizing text') {
+      return;
+    }
+    
+    const line = m.progress ? Math.floor(m.progress * 20) : 0;
+    const space = line < 20 ? (19 - line) : 0;
+
+    const lineBuffer = new Array(line).fill('=');
+    const spaceBuffer = new Array(space).fill(' ');
+
+    console.log('Processing Image...');
+    console.log(`[${lineBuffer.join('')}${ line < 19 ? '>' : ''}${spaceBuffer.join('')}]`);
+
+  }
+});
 
 page('/', () => {
   const content = html`
@@ -366,6 +440,7 @@ page('/live', async () => {
       ${videoElement}
       ${canvas}
       <div class="actions">
+        <mwc-icon-button icon="format_shapes"  @click=${scanImage}></mwc-icon-button>
         <mwc-icon-button icon="add_a_photo"  @click=${createSnap}></mwc-icon-button>
         <mwc-icon-button icon="stop"  @click=${stopRecording}></mwc-icon-button>
         <mwc-icon-button icon="pause"  @click=${pauseVideo}></mwc-icon-button>

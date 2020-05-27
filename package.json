@@ -22,7 +22,8 @@
     "@material/mwc-tab-bar": "^0.14.1",
     "lit-html": "^1.2.1",
     "page": "^1.11.5",
-    "page.js": "^4.13.3"
+    "page.js": "^4.13.3",
+    "tesseract.js": "^2.1.1"
   },
   "devDependencies": {
     "http-server": "^0.12.1",
