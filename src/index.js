@@ -128,10 +128,24 @@ const scanImage = async ($event) => {
   ctx.drawImage(videoElement, 0, 0, videoElement.videoWidth, videoElement.videoHeight)
   var dataURI = canvas.toDataURL('image/png');
 
+  const container = document.createElement('div');
+  const overlay = document.createElement('div');
+  const loadingMessage = document.createElement('p');
   const image = document.createElement('img');
   const imageList = document.querySelector('.snapshots');
 
+  container.classList.add('img-container');
+  overlay.classList.add('image-overlay');
+  loadingMessage.classList.add('overlay-message');
+  loadingMessage.id = 'loading';
+
+  loadingMessage.textContent = 'Processing...'
   image.src = dataURI;
+
+  overlay.appendChild(loadingMessage);
+  container.appendChild(image);
+  container.appendChild(overlay);
+  imageList.appendChild(container);
 
   await worker.load();
   await worker.loadLanguage('eng');
@@ -161,8 +175,8 @@ const scanImage = async ($event) => {
   console.dir(text);
   console.log('================')
 
-  imageList.appendChild(image);
   imageList.appendChild(info);
+  container.removeChild(overlay);
   return dataURI;
 }
 
@@ -431,10 +445,35 @@ page('/live', async () => {
         color: var(--mdc-theme-primary);
       }
 
-      .snapshots img {
+      .snapshots .img-container {
         width: 100%;
         padding: 0.5rem;
+        position: relative;
       }
+
+      .img-container img {
+        width: 100%
+      }
+
+      .image-overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.75);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .overlay-message {
+        color: #fff;
+      }
+
     </style>
     <div class="card live">
       ${videoElement}
