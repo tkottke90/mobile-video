@@ -5932,7 +5932,7 @@ let animationFrame;
 
 const videoConstraints = window.constraints = {
   video: {
-    facingMode: { exact: 'environment' }
+    facingMode: 'environment'
   },
   audio: false
 };
@@ -6049,6 +6049,8 @@ const scanImage = async ($event) => {
   const loadingMessage = document.createElement('p');
   const image = document.createElement('img');
   const imageList = document.querySelector('.snapshots');
+  const info = document.createElement('pre');
+  const ocrBTN = document.querySelector('#ocr-btn');
 
   container.classList.add('img-container');
   overlay.classList.add('image-overlay');
@@ -6057,11 +6059,13 @@ const scanImage = async ($event) => {
 
   loadingMessage.textContent = 'Processing...';
   image.src = dataURI;
+  ocrBTN.setAttribute('disabled', '');
 
   overlay.appendChild(loadingMessage);
   container.appendChild(image);
   container.appendChild(overlay);
   imageList.appendChild(container);
+  imageList.appendChild(info);
 
   await worker.load();
   await worker.loadLanguage('eng');
@@ -6073,8 +6077,6 @@ const scanImage = async ($event) => {
   const timeDiff = endTime - processTimer;
   processTimer = 0;
   
-
-  const info = document.createElement('pre');
   info.style.padding = '0.5rem';
   info.style.margin = '0.5rem';
   info.style.background = 'var(--mdc-theme-background)';
@@ -6091,8 +6093,8 @@ const scanImage = async ($event) => {
   console.dir(text);
   console.log('================');
 
-  imageList.appendChild(info);
   container.removeChild(overlay);
+  ocrBTN.removeAttribute('disabled');
   return dataURI;
 };
 
@@ -6361,10 +6363,15 @@ page('/live', async () => {
         color: var(--mdc-theme-primary);
       }
 
-      .snapshots .img-container {
+      .snapshots > .img-container {
         width: 100%;
         padding: 0.5rem;
         position: relative;
+      }
+
+      .snapshots > img {
+        width: 100%;
+        padding: 0.5rem;
       }
 
       .img-container img {
@@ -6388,6 +6395,7 @@ page('/live', async () => {
 
       .overlay-message {
         color: #fff;
+        font-size: 2rem;
       }
 
     </style>
@@ -6395,7 +6403,7 @@ page('/live', async () => {
       ${videoElement}
       ${canvas}
       <div class="actions">
-        <mwc-icon-button icon="format_shapes"  @click=${scanImage}></mwc-icon-button>
+        <mwc-icon-button icon="format_shapes" id="ocr-btn"  @click=${scanImage}></mwc-icon-button>
         <mwc-icon-button icon="add_a_photo"  @click=${createSnap}></mwc-icon-button>
         <mwc-icon-button icon="stop"  @click=${stopRecording}></mwc-icon-button>
         <mwc-icon-button icon="pause"  @click=${pauseVideo}></mwc-icon-button>
