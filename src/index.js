@@ -16,7 +16,7 @@ let animationFrame;
 
 const videoConstraints = window.constraints = {
   video: {
-    facingMode: { exact: 'environment' }
+    facingMode: 'environment'
   },
   audio: false
 }
